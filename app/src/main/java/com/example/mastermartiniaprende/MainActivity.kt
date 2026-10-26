@@ -14,6 +14,9 @@ import com.example.mastermartiniaprende.ui.screens.RegistroScreen
 import com.example.mastermartiniaprende.ui.theme.MasterMartiniAulaTheme
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.mastermartiniaprende.ui.screens.DetalleCursoScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -61,8 +64,35 @@ class MainActivity : ComponentActivity() {
 
                     composable("catalogo") {
                         CatalogoScreen(
-                            viewModel = catalogoViewModel
+                            viewModel = catalogoViewModel,
+                            onCursoClick = { cursoId ->
+                                navController.navigate("detalleCurso/$cursoId")
+                            }
                         )
+                    }
+
+                    composable(
+                        route = "detalleCurso/{cursoId}",
+                        arguments = listOf(
+                            navArgument("cursoId") {
+                                type = NavType.IntType
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val cursoId = backStackEntry.arguments?.getInt("cursoId") ?: -1
+                        val curso = catalogoViewModel.obtenerCursoPorId(cursoId)
+
+                        if (curso != null) {
+                            DetalleCursoScreen(
+                                curso = curso,
+                                onVolver = {
+                                    navController.popBackStack()
+                                },
+                                onComenzar = {
+                                    // Conectaremos este botón a las clases más adelante.
+                                }
+                            )
+                        }
                     }
                 }
             }

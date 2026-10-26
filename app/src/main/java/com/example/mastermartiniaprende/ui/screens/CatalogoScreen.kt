@@ -16,9 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
+import androidx.compose.foundation.clickable
 
 @Composable
-fun CatalogoScreen(viewModel: CatalogoViewModel) {
+fun CatalogoScreen(
+    viewModel: CatalogoViewModel,
+    onCursoClick: (Int) -> Unit
+) {
 
     val cursos = viewModel.cursos.value
 
@@ -53,7 +57,9 @@ fun CatalogoScreen(viewModel: CatalogoViewModel) {
             items(cursos) { curso ->
 
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onCursoClick(curso.id) }
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
