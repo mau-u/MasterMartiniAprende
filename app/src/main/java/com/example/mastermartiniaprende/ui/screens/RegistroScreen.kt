@@ -30,6 +30,7 @@ fun RegistroScreen(
 ) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var tipoNegocio by remember { mutableStateOf("")}
     var password by remember { mutableStateOf("") }
 
     Column(
@@ -73,6 +74,19 @@ fun RegistroScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
+            value = tipoNegocio,
+            onValueChange = { tipoNegocio = it },
+            label = { Text("Tipo de negocio o emprendimiento") },
+            supportingText = {
+                Text("Ej.: pastelería, panadería o cafetería")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
@@ -85,7 +99,12 @@ fun RegistroScreen(
 
         Button(
             onClick = {
-                viewModel.registrar(nombre, email, password)
+                viewModel.registrar(
+                    nombre = nombre,
+                    email = email,
+                    password = password,
+                    tipoNegocio = tipoNegocio
+                )
             },
             modifier = Modifier.fillMaxWidth()
         ) {
