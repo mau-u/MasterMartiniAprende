@@ -23,12 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mastermartiniaprende.ui.components.IconoErrorCampo
+import com.example.mastermartiniaprende.ui.components.MarcaMasterMartini
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: AuthViewModel
+    viewModel: AuthViewModel,
+    onLoginExitoso: (String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -40,22 +43,14 @@ fun LoginScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-
-        Text(
-            text = "Master Martini Aula",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
+        MarcaMasterMartini(grande = true)
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Iniciar sesión",
             style = MaterialTheme.typography.titleLarge
         )
-
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Campo: Correo electrónico
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -63,22 +58,20 @@ fun LoginScreen(
                 viewModel.errorEmailLogin.value = null
                 viewModel.mensaje.value = ""
             },
-            label = {
-                Text("Correo electrónico")
-            },
+            label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorEmailLogin.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorEmailLogin.value != null)
+            },
             supportingText = {
-                viewModel.errorEmailLogin.value?.let { error ->
-                    Text(error)
-                }
+                viewModel.errorEmailLogin.value?.let { Text(it) }
             }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo: Contraseña
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -86,44 +79,46 @@ fun LoginScreen(
                 viewModel.errorPasswordLogin.value = null
                 viewModel.mensaje.value = ""
             },
-            label = {
-                Text("Contraseña")
-            },
+            label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorPasswordLogin.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorPasswordLogin.value != null)
+            },
             supportingText = {
-                viewModel.errorPasswordLogin.value?.let { error ->
-                    Text(error)
-                }
+                viewModel.errorPasswordLogin.value?.let { Text(it) }
             }
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Botón: iniciar sesión
         Button(
             onClick = {
-                if (viewModel.login(email, password)) {
-                    navController.navigate("home")
+                viewModel.login(email, password) { usuario ->
+                    if (usuario != null) {
+                        onLoginExitoso(usuario.email)
+                    }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !viewModel.cargando.value
         ) {
-            Text("Entrar")
+            Text(if (viewModel.cargando.value) "Ingresando…" else "Entrar")
         }
 
-        // Mensaje general del inicio de sesión
         Text(
             text = viewModel.mensaje.value,
             modifier = Modifier.padding(top = 12.dp)
         )
 
-        // Volver al registro
         TextButton(
             onClick = {
-                navController.popBackStack()
+                navController.navigate("register") {
+                    popUpTo("login") { inclusive = true }
+                    launchSingleTop = true
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

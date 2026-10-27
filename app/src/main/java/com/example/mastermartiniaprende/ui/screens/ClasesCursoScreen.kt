@@ -1,5 +1,6 @@
 package com.example.mastermartiniaprende.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -38,13 +40,16 @@ fun ClasesCursoScreen(
     onResultadoClick: () -> Unit,
     onVolver: () -> Unit
 ) {
-    // Cargar las lecciones del curso seleccionado
     LaunchedEffect(curso.id) {
         leccionViewModel.cargarLecciones(curso.id)
     }
 
     val lecciones = leccionViewModel.lecciones.value
     val progreso = viewModel.progresoCurso(curso)
+    val progresoAnimado by animateFloatAsState(
+        targetValue = progreso.coerceIn(0, 100) / 100f,
+        label = "avanceClases${curso.id}"
+    )
 
     Column(
         modifier = Modifier
@@ -53,45 +58,22 @@ fun ClasesCursoScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Clases del curso",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Text(
-            text = curso.titulo,
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Text(
-            text = "Tu progreso: $progreso%",
-            style = MaterialTheme.typography.titleMedium
-        )
-
+        Text("Clases y recetas", style = MaterialTheme.typography.headlineSmall)
+        Text(curso.titulo, style = MaterialTheme.typography.titleLarge)
+        Text("Tu progreso: $progreso%", style = MaterialTheme.typography.titleMedium)
         LinearProgressIndicator(
-            progress = { progreso / 100f },
+            progress = { progresoAnimado },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Text(
-            text = "Selecciona una clase para consultar su contenido."
-        )
+        Text("Abre una clase para ver ingredientes, fotos y receta paso a paso.", style = MaterialTheme.typography.bodyLarge)
 
         if (lecciones.isEmpty()) {
-            Text(
-                text = "Todavía no hay lecciones disponibles para este curso."
-            )
+            Text("Todavía no hay lecciones disponibles para este curso.")
         } else {
             lecciones.forEach { leccion ->
-
-                val completada = viewModel.estaClaseCompletada(
-                    cursoId = curso.id,
-                    numeroClase = leccion.numero
-                )
-
-                // Seleccionar la foto según la clase
-                val imagenLeccion = if (curso.id == 1) {
-                    when (leccion.numero) {
+                val completada = viewModel.estaClaseCompletada(curso.id, leccion.numero)
+                val imagenLeccion = when (curso.id) {
+                    1 -> when (leccion.numero) {
                         1 -> R.drawable.ingredientes_chocolate
                         2 -> R.drawable.base_chocolate
                         3 -> R.drawable.ganache_chocolate
@@ -99,8 +81,9 @@ fun ClasesCursoScreen(
                         5 -> R.drawable.resultado_chocolate
                         else -> null
                     }
-                } else {
-                    null
+                    2 -> R.drawable.pasteleria_vitrina
+                    3 -> R.drawable.masas_bolleria
+                    else -> null
                 }
 
                 Card(
@@ -110,64 +93,32 @@ fun ClasesCursoScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onLeccionClick(leccion.id)
-                            }
+                            .clickable { onLeccionClick(leccion.id) }
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Mostrar la fotografía de la clase
                         if (imagenLeccion != null) {
                             Image(
-                                painter = painterResource(
-                                    id = imagenLeccion
-                                ),
-                                contentDescription =
-                                    "Imagen de ${leccion.titulo}",
+                                painter = painterResource(imagenLeccion),
+                                contentDescription = "Imagen de ${leccion.titulo}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(180.dp)
-                                    .clip(
-                                        RoundedCornerShape(12.dp)
-                                    ),
+                                    .clip(RoundedCornerShape(12.dp)),
                                 contentScale = ContentScale.Crop
                             )
                         }
-
+                        Text("Clase ${leccion.numero}", style = MaterialTheme.typography.labelLarge)
+                        Text(leccion.titulo, style = MaterialTheme.typography.titleMedium)
+                        Text(leccion.descripcion, style = MaterialTheme.typography.bodyMedium)
+                        Text("${leccion.duracionMinutos} minutos")
                         Text(
-                            text = "Clase ${leccion.numero}",
-                            style = MaterialTheme.typography.labelLarge
+                            text = if (completada) "✓ Completada" else "Pendiente",
+                            color = if (completada) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-
                         Text(
-                            text = leccion.titulo,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Text(
-                            text = leccion.descripcion,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text = "${leccion.duracionMinutos} minutos"
-                        )
-
-                        Text(
-                            text = if (completada) {
-                                "✓ Completada"
-                            } else {
-                                "Pendiente"
-                            },
-                            color = if (completada) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-
-                        Text(
-                            text = "Tocar para ver la lección",
+                            "Tocar para ver la receta y sus ingredientes",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -176,7 +127,6 @@ fun ClasesCursoScreen(
             }
         }
 
-        // Registrar el resultado cuando el progreso llegue al 100 %
         if (progreso == 100) {
             Button(
                 onClick = onResultadoClick,

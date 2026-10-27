@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mastermartiniaprende.ui.components.IconoErrorCampo
+import com.example.mastermartiniaprende.ui.components.MarcaMasterMartini
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 
 @Composable
@@ -40,17 +42,12 @@ fun RegistroScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Master Martini Aula",
-            style = MaterialTheme.typography.headlineSmall
-        )
-
+        MarcaMasterMartini(grande = true)
         Text(
             text = "Crea tu cuenta",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleLarge
         )
 
-        // Campo: Nombre
         OutlinedTextField(
             value = nombre,
             onValueChange = {
@@ -61,14 +58,14 @@ fun RegistroScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorNombreRegistro.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorNombreRegistro.value != null)
+            },
             supportingText = {
-                viewModel.errorNombreRegistro.value?.let { error ->
-                    Text(error)
-                }
+                viewModel.errorNombreRegistro.value?.let { Text(it) }
             }
         )
 
-        // Campo: Correo
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -79,14 +76,14 @@ fun RegistroScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorEmailRegistro.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorEmailRegistro.value != null)
+            },
             supportingText = {
-                viewModel.errorEmailRegistro.value?.let { error ->
-                    Text(error)
-                }
+                viewModel.errorEmailRegistro.value?.let { Text(it) }
             }
         )
 
-        // Campo: Tipo de negocio
         OutlinedTextField(
             value = tipoNegocio,
             onValueChange = {
@@ -97,16 +94,15 @@ fun RegistroScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorTipoNegocioRegistro.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorTipoNegocioRegistro.value != null)
+            },
             supportingText = {
                 val error = viewModel.errorTipoNegocioRegistro.value
-
-                Text(
-                    error ?: "Ej.: pastelería, panadería o cafetería"
-                )
+                Text(error ?: "Ej.: pastelería, panadería o cafetería")
             }
         )
 
-        // Campo: Contraseña
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -118,46 +114,45 @@ fun RegistroScreen(
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             isError = viewModel.errorPasswordRegistro.value != null,
+            trailingIcon = {
+                IconoErrorCampo(visible = viewModel.errorPasswordRegistro.value != null)
+            },
             supportingText = {
-                viewModel.errorPasswordRegistro.value?.let { error ->
-                    Text(error)
-                }
+                viewModel.errorPasswordRegistro.value?.let { Text(it) }
             }
         )
 
-        // Botón para registrar
         Button(
             onClick = {
-                val registroExitoso = viewModel.registrar(
+                viewModel.registrar(
                     nombre = nombre,
                     email = email,
                     password = password,
                     tipoNegocio = tipoNegocio
-                )
-
-                if (registroExitoso) {
-                    navController.navigate("login") {
-                        popUpTo("register") {
-                            inclusive = true
+                ) { registroExitoso ->
+                    if (registroExitoso) {
+                        navController.navigate("login") {
+                            popUpTo("register") { inclusive = true }
                         }
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !viewModel.cargando.value
         ) {
-            Text("Crear cuenta")
+            Text(if (viewModel.cargando.value) "Guardando cuenta…" else "Crear cuenta")
         }
 
-        // Mensaje de resultado
         Text(
             text = viewModel.mensaje.value,
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Navegar al login
         TextButton(
             onClick = {
-                navController.navigate("login")
+                navController.navigate("login") {
+                    launchSingleTop = true
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

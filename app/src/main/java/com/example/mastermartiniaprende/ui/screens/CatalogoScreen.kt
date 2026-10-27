@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.R
+import com.example.mastermartiniaprende.ui.components.MarcaMasterMartini
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
 
 @Composable
@@ -37,54 +38,43 @@ fun CatalogoScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        MarcaMasterMartini()
 
         Text(
-            text = "Master Martini Aprende",
+            text = "Explora cursos y recetas",
             style = MaterialTheme.typography.headlineSmall
         )
-
         Text(
-            text = "Aprende a tu manera",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Text(
-            text = "Explora nuestros cursos de gastronomía."
+            text = "Elige un curso y entra directamente a sus clases paso a paso.",
+            style = MaterialTheme.typography.bodyLarge
         )
 
         cursos.forEach { curso ->
-
             val imagenCurso = when (curso.id) {
-                1 -> R.drawable.chocolate_brillante
-                2 -> R.drawable.pasteleria_vitrina
-                3 -> R.drawable.masas_bolleria
+                1 -> R.drawable.foto_chocolate_pexels
+                2 -> R.drawable.foto_pasteleria_pexels
+                3 -> R.drawable.foto_croissants_pexels
                 else -> null
             }
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        onCursoClick(curso.id)
-                    },
-                shape = RoundedCornerShape(16.dp)
+                    .clickable { onCursoClick(curso.id) },
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Column {
-
                     if (imagenCurso != null) {
                         Image(
-                            painter = painterResource(
-                                id = imagenCurso
-                            ),
-                            contentDescription =
-                                "Resultado esperado de ${curso.titulo}",
+                            painter = painterResource(id = imagenCurso),
+                            contentDescription = "Preparación del curso ${curso.titulo}",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(190.dp)
                                 .clip(
                                     RoundedCornerShape(
-                                        topStart = 16.dp,
-                                        topEnd = 16.dp
+                                        topStart = 20.dp,
+                                        topEnd = 20.dp
                                     )
                                 ),
                             contentScale = ContentScale.Crop
@@ -93,33 +83,29 @@ fun CatalogoScreen(
 
                     Column(
                         modifier = Modifier.padding(16.dp),
-                        verticalArrangement =
-                            Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
                             text = curso.categoria.uppercase(),
-                            style =
-                                MaterialTheme.typography.labelMedium,
-                            color =
-                                MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
                         )
-
                         Text(
                             text = curso.titulo,
-                            style =
-                                MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleLarge
                         )
-
                         Text(
                             text = curso.descripcion,
-                            style =
-                                MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyLarge
                         )
-
                         Text(
                             text = "${curso.cantidadClases} clases · Nivel ${curso.nivel}",
-                            style =
-                                MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = "Ver curso y recetas →",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

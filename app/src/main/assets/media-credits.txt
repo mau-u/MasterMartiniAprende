@@ -1,0 +1,24 @@
+Recursos visuales utilizados en Master Martini Aprende (proyecto académico)
+
+1) Fotografía de decoración de pastel con chocolate
+Autor: Gustavo Fring — Pexels
+Página: https://www.pexels.com/photo/crop-faceless-female-pastry-cook-decorating-cake-with-chocolate-in-kitchen-3983576/
+Licencia: https://www.pexels.com/license/
+
+2) Fotografía de croissants en una panadería
+Autora: Valeria Boltneva — Pexels
+Página: https://www.pexels.com/photo/croissants-in-a-bakery-18058319/
+Licencia: https://www.pexels.com/license/
+
+3) Fotografía de productos en vitrina de pastelería
+Autor: Jason Shi — Pexels
+Página: https://www.pexels.com/photo/delicious-bakery-pastries-on-display-29548447/
+Licencia: https://www.pexels.com/license/
+
+4) Video de cobertura de chocolate sobre un pastel
+Autor: Fabi Arts — Pexels
+Página: https://www.pexels.com/video/person-pouring-a-chocolate-on-the-cake-5453497/
+Licencia: https://www.pexels.com/license/
+Archivo MP4 incluido en res/raw para reproducirse dentro de la aplicación.
+
+Se incluyen nombres de autores y enlaces como buena práctica. La licencia de Pexels permite el uso gratuito de fotos y videos en aplicaciones, con las restricciones indicadas en su sitio oficial.
