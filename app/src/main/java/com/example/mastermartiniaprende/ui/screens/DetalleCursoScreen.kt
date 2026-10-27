@@ -24,13 +24,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.R
 import com.example.mastermartiniaprende.model.Curso
+import com.example.mastermartiniaprende.ui.components.IndicadorProgresoCurso
 import com.example.mastermartiniaprende.ui.components.ReproductorVideoLocal
+import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
 import com.example.mastermartiniaprende.viewmodel.LeccionViewModel
 
 @Composable
 fun DetalleCursoScreen(
     curso: Curso,
     leccionViewModel: LeccionViewModel,
+    catalogoViewModel: CatalogoViewModel,
     onLeccionClick: (Int) -> Unit,
     onVolver: () -> Unit,
     onComenzar: () -> Unit
@@ -91,6 +94,11 @@ fun DetalleCursoScreen(
                 )
             }
         }
+
+        IndicadorProgresoCurso(
+            curso = curso,
+            clasesCompletadas = catalogoViewModel.cantidadClasesCompletadas(curso)
+        )
 
         leccionConVideo?.let { leccionVideo ->
             Text(

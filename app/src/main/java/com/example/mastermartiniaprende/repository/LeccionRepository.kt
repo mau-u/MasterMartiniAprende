@@ -94,7 +94,8 @@ object LeccionRepository {
             descripcion = "Prepara el producto para exhibirlo en una vitrina.",
             duracionMinutos = 15,
             materiales = listOf("Producto montado", "Espátula", "Decoración", "Envase"),
-            pasos = listOf("Alisa o termina la superficie.", "Agrega la decoración elegida.", "Limpia los bordes y prepara la presentación.", "Revisa el producto antes de llevarlo a la vitrina.")
+            pasos = listOf("Alisa o termina la superficie.", "Agrega la decoración elegida.", "Limpia los bordes y prepara la presentación.", "Revisa el producto antes de llevarlo a la vitrina."),
+            videoResourceId = R.raw.clase_pasteleria_terminaciones
         ),
         Leccion(
             id = 301,
@@ -114,7 +115,8 @@ object LeccionRepository {
             descripcion = "Integra los ingredientes y trabaja la masa de forma uniforme.",
             duracionMinutos = 20,
             materiales = listOf("Ingredientes pesados", "Bowl", "Mesón", "Espátula"),
-            pasos = listOf("Incorpora los ingredientes siguiendo la receta.", "Mezcla hasta formar una masa.", "Amasa hasta lograr una textura uniforme.", "Deja reposar si la receta lo indica.")
+            pasos = listOf("Incorpora los ingredientes siguiendo la receta.", "Mezcla hasta formar una masa.", "Amasa hasta lograr una textura uniforme.", "Deja reposar si la receta lo indica."),
+            videoResourceId = R.raw.clase_masas_amasado
         ),
         Leccion(
             id = 303,

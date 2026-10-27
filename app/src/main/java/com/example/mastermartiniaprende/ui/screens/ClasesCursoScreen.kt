@@ -1,6 +1,5 @@
 package com.example.mastermartiniaprende.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,13 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -28,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.R
 import com.example.mastermartiniaprende.model.Curso
+import com.example.mastermartiniaprende.ui.components.IndicadorProgresoCurso
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
 import com.example.mastermartiniaprende.viewmodel.LeccionViewModel
 
@@ -46,10 +44,7 @@ fun ClasesCursoScreen(
 
     val lecciones = leccionViewModel.lecciones.value
     val progreso = viewModel.progresoCurso(curso)
-    val progresoAnimado by animateFloatAsState(
-        targetValue = progreso.coerceIn(0, 100) / 100f,
-        label = "avanceClases${curso.id}"
-    )
+
 
     Column(
         modifier = Modifier
@@ -60,10 +55,9 @@ fun ClasesCursoScreen(
     ) {
         Text("Clases y recetas", style = MaterialTheme.typography.headlineSmall)
         Text(curso.titulo, style = MaterialTheme.typography.titleLarge)
-        Text("Tu progreso: $progreso%", style = MaterialTheme.typography.titleMedium)
-        LinearProgressIndicator(
-            progress = { progresoAnimado },
-            modifier = Modifier.fillMaxWidth()
+        IndicadorProgresoCurso(
+            curso = curso,
+            clasesCompletadas = viewModel.cantidadClasesCompletadas(curso)
         )
         Text("Abre una clase para ver ingredientes, fotos y receta paso a paso.", style = MaterialTheme.typography.bodyLarge)
 
