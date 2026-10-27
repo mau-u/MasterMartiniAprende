@@ -74,12 +74,16 @@ class CatalogoViewModel(private val repository: AppRepository) : ViewModel() {
         }
     }
 
-    fun progresoCurso(curso: Curso): Int {
+    fun cantidadClasesCompletadas(curso: Curso): Int {
         val totalClases = curso.cantidadClases
         if (totalClases <= 0) return 0
-        val completadas = clasesCompletadas.value[curso.id].orEmpty()
-        val cantidadCompletadas = completadas.count { it in 1..totalClases }
-        return cantidadCompletadas * 100 / totalClases
+        return clasesCompletadas.value[curso.id].orEmpty()
+            .count { it in 1..totalClases }
+    }
+
+    fun progresoCurso(curso: Curso): Int {
+        if (curso.cantidadClases <= 0) return 0
+        return cantidadClasesCompletadas(curso) * 100 / curso.cantidadClases
     }
 
     fun inscribirCurso(cursoId: Int) {
@@ -98,14 +102,27 @@ class CatalogoViewModel(private val repository: AppRepository) : ViewModel() {
 
     fun obtenerMisCursos(): List<Curso> = cursos.value.filter { it.id in cursosInscritos.value }
 
-    fun guardarFotoResultado(cursoId: Int, rutaFoto: String) {
-        val email = emailUsuario.value ?: return
-        fotosResultado.value = fotosResultado.value + (cursoId to rutaFoto)
+    fun guardarFotoResultado(
+        cursoId: Int,
+        rutaFoto: String,
+        alGuardar: (Boolean) -> Unit
+    ) {
+        val email = emailUsuario.value
+        if (email == null) {
+            mensaje.value = "Inicia sesión para guardar tu fotografía."
+            alGuardar(false)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 repository.guardarFotoResultado(email, cursoId, rutaFoto)
+                fotosResultado.value = fotosResultado.value + (cursoId to rutaFoto)
+                mensaje.value = ""
+                alGuardar(true)
             } catch (error: Exception) {
-                mensaje.value = "La foto se guardó, pero no su referencia."
+                mensaje.value = "No se pudo guardar la fotografía en el curso."
+                alGuardar(false)
             }
         }
     }

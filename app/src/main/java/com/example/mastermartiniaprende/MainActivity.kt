@@ -167,6 +167,7 @@ class MainActivity : ComponentActivity() {
                                     DetalleCursoScreen(
                                         curso = curso,
                                         leccionViewModel = leccionViewModel,
+                                        catalogoViewModel = catalogoViewModel,
                                         onLeccionClick = { leccionId ->
                                             catalogoViewModel.inscribirCurso(cursoId)
                                             navController.navigate("detalleLeccion/$leccionId")

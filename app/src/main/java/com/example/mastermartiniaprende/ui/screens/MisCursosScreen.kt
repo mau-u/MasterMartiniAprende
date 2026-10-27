@@ -1,26 +1,23 @@
 package com.example.mastermartiniaprende.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.mastermartiniaprende.ui.components.IndicadorProgresoCurso
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
 
 @Composable
@@ -68,11 +65,6 @@ fun MisCursosScreen(
                     key = { curso -> curso.id }
                 ) { curso ->
 
-                    val progreso = viewModel.progresoCurso(curso)
-                    val progresoAnimado by animateFloatAsState(
-                        targetValue = progreso.coerceIn(0, 100) / 100f,
-                        label = "avanceCurso${curso.id}"
-                    )
 
                     Card(
                         modifier = Modifier.fillMaxWidth()
@@ -103,17 +95,9 @@ fun MisCursosScreen(
                                         "Nivel ${curso.nivel}"
                             )
 
-                            Text(
-                                text = "Progreso: $progreso%"
-                            )
-
-                            LinearProgressIndicator(
-                                progress = { progresoAnimado },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(
-                                modifier = Modifier.height(4.dp)
+                            IndicadorProgresoCurso(
+                                curso = curso,
+                                clasesCompletadas = viewModel.cantidadClasesCompletadas(curso)
                             )
 
                             Button(

@@ -22,3 +22,16 @@ Licencia: https://www.pexels.com/license/
 Archivo MP4 incluido en res/raw para reproducirse dentro de la aplicación.
 
 Se incluyen nombres de autores y enlaces como buena práctica. La licencia de Pexels permite el uso gratuito de fotos y videos en aplicaciones, con las restricciones indicadas en su sitio oficial.
+5) Video de decoración de una torta
+Autor: Pavel Danilyuk — Pexels
+Página: https://www.pexels.com/video/woman-decorating-a-cake-6942749/
+Licencia: https://www.pexels.com/license/
+Archivo MP4 local: res/raw/clase_pasteleria_terminaciones.mp4
+Usado en el curso Pastelería de vitrina, lección 4.
+
+6) Video de amasado de masa
+Autora: Katrin Bolovtsova — Pexels
+Página: https://www.pexels.com/video/person-kneading-dough-5694305/
+Licencia: https://www.pexels.com/license/
+Archivo MP4 local: res/raw/clase_masas_amasado.mp4
+Usado en el curso Masas y bollería, lección 2.
