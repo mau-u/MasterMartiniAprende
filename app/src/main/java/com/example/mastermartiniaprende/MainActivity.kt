@@ -3,13 +3,25 @@ package com.example.mastermartiniaprende
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.mastermartiniaprende.data.local.AppDatabase
+import com.example.mastermartiniaprende.repository.AppRepository
+import com.example.mastermartiniaprende.ui.components.BarraNavegacionPrincipal
 import com.example.mastermartiniaprende.ui.screens.CatalogoScreen
 import com.example.mastermartiniaprende.ui.screens.ClasesCursoScreen
 import com.example.mastermartiniaprende.ui.screens.DetalleCursoScreen
@@ -17,242 +29,231 @@ import com.example.mastermartiniaprende.ui.screens.DetalleLeccionScreen
 import com.example.mastermartiniaprende.ui.screens.HomeScreen
 import com.example.mastermartiniaprende.ui.screens.LoginScreen
 import com.example.mastermartiniaprende.ui.screens.MisCursosScreen
+import com.example.mastermartiniaprende.ui.screens.PerfilScreen
 import com.example.mastermartiniaprende.ui.screens.RegistroScreen
 import com.example.mastermartiniaprende.ui.screens.ResultadoFinalScreen
-import com.example.mastermartiniaprende.ui.theme.MasterMartiniAulaTheme
+import com.example.mastermartiniaprende.ui.theme.MasterMartiniAprendeTheme
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
 import com.example.mastermartiniaprende.viewmodel.LeccionViewModel
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MasterMartiniAulaTheme {
-
-                val navController = rememberNavController()
-
-                val authViewModel = remember {
-                    AuthViewModel()
-                }
-
-                val catalogoViewModel = remember {
-                    CatalogoViewModel()
-                }
-
-                val leccionViewModel = remember {
-                    LeccionViewModel()
-                }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "register"
+            MasterMartiniAprendeTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-
-                    // 1. Registro
-                    composable("register") {
-                        RegistroScreen(
-                            navController = navController,
-                            viewModel = authViewModel
-                        )
+                    val context = LocalContext.current.applicationContext
+                    val appRepository = remember(context) {
+                        val dao = AppDatabase.getDatabase(context).appDao()
+                        AppRepository(dao)
                     }
-
-                    // 2. Inicio de sesión
-                    composable("login") {
-                        LoginScreen(
-                            navController = navController,
-                            viewModel = authViewModel
-                        )
+                    val navController = rememberNavController()
+                    val authViewModel = remember(appRepository) {
+                        AuthViewModel(appRepository)
                     }
-
-                    // 3. Inicio
-                    composable("home") {
-                        HomeScreen(
-                            navController = navController,
-                            viewModel = authViewModel
-                        )
+                    val catalogoViewModel = remember(appRepository) {
+                        CatalogoViewModel(appRepository)
                     }
+                    val leccionViewModel = remember {
+                        LeccionViewModel()
+                    }
+                    val backStackEntry by navController.currentBackStackEntryAsState()
+                    val rutaActual = backStackEntry?.destination?.route
+                    val mostrarNavegacion = rutaActual != null &&
+                        rutaActual !in listOf("register", "login")
 
-                    // 4. Catálogo de cursos
-                    composable("catalogo") {
-                        CatalogoScreen(
-                            viewModel = catalogoViewModel,
-                            onCursoClick = { cursoId ->
-                                navController.navigate(
-                                    "detalleCurso/$cursoId"
+                    Scaffold(
+                        bottomBar = {
+                            if (mostrarNavegacion) {
+                                BarraNavegacionPrincipal(
+                                    navController = navController,
+                                    rutaActual = rutaActual
                                 )
                             }
-                        )
-                    }
-
-                    // 5. Mis cursos
-                    composable("misCursos") {
-                        MisCursosScreen(
-                            viewModel = catalogoViewModel,
-                            onCursoClick = { cursoId ->
-                                navController.navigate(
-                                    "detalleCurso/$cursoId"
+                        }
+                    ) { paddingContenido ->
+                        NavHost(
+                            navController = navController,
+                            startDestination = "register",
+                            modifier = Modifier.padding(paddingContenido)
+                        ) {
+                            composable("register") {
+                                RegistroScreen(
+                                    navController = navController,
+                                    viewModel = authViewModel
                                 )
-                            },
-                            onExplorarCursos = {
-                                navController.navigate("catalogo") {
-                                    launchSingleTop = true
-                                }
                             }
-                        )
-                    }
 
-                    // 6. Detalle del curso
-                    composable(
-                        route = "detalleCurso/{cursoId}",
-                        arguments = listOf(
-                            navArgument("cursoId") {
-                                type = NavType.IntType
-                            }
-                        )
-                    ) { entry ->
-
-                        val cursoId =
-                            entry.arguments?.getInt("cursoId") ?: -1
-
-                        val curso =
-                            catalogoViewModel.obtenerCursoPorId(cursoId)
-
-                        if (curso != null) {
-                            DetalleCursoScreen(
-                                curso = curso,
-                                onVolver = {
-                                    navController.popBackStack()
-                                },
-                                onComenzar = {
-                                    catalogoViewModel.inscribirCurso(cursoId)
-
-                                    navController.navigate(
-                                        "clasesCurso/$cursoId"
-                                    )
-                                }
-                            )
-                        } else {
-                            Text("No se encontró el curso.")
-                        }
-                    }
-
-                    // 7. Lista de clases del curso
-                    composable(
-                        route = "clasesCurso/{cursoId}",
-                        arguments = listOf(
-                            navArgument("cursoId") {
-                                type = NavType.IntType
-                            }
-                        )
-                    ) { entry ->
-
-                        val cursoId =
-                            entry.arguments?.getInt("cursoId") ?: -1
-
-                        val curso =
-                            catalogoViewModel.obtenerCursoPorId(cursoId)
-
-                        if (curso != null) {
-                            ClasesCursoScreen(
-                                curso = curso,
-                                viewModel = catalogoViewModel,
-                                leccionViewModel = leccionViewModel,
-
-                                onLeccionClick = { leccionId ->
-                                    navController.navigate(
-                                        "detalleLeccion/$leccionId"
-                                    )
-                                },
-
-                                // NUEVO: abrir el resultado final
-                                onResultadoClick = {
-                                    navController.navigate(
-                                        "resultadoFinal/${curso.id}"
-                                    )
-                                },
-
-                                onVolver = {
-                                    navController.popBackStack()
-                                }
-                            )
-                        } else {
-                            Text("No se encontró el curso.")
-                        }
-                    }
-
-                    // 8. Contenido individual de una lección
-                    composable(
-                        route = "detalleLeccion/{leccionId}",
-                        arguments = listOf(
-                            navArgument("leccionId") {
-                                type = NavType.IntType
-                            }
-                        )
-                    ) { entry ->
-
-                        val leccionId =
-                            entry.arguments?.getInt("leccionId") ?: -1
-
-                        val leccion =
-                            leccionViewModel.obtenerLeccionPorId(leccionId)
-
-                        if (leccion != null) {
-                            DetalleLeccionScreen(
-                                leccion = leccion,
-                                onVolver = {
-                                    navController.popBackStack()
-                                },
-                                onCompletar = {
-
-                                    if (
-                                        !catalogoViewModel.estaClaseCompletada(
-                                            cursoId = leccion.cursoId,
-                                            numeroClase = leccion.numero
-                                        )
-                                    ) {
-                                        catalogoViewModel.alternarClaseCompletada(
-                                            cursoId = leccion.cursoId,
-                                            numeroClase = leccion.numero
-                                        )
+                            composable("login") {
+                                LoginScreen(
+                                    navController = navController,
+                                    viewModel = authViewModel,
+                                    onLoginExitoso = { email ->
+                                        catalogoViewModel.cargarUsuario(email) {
+                                            navController.navigate("home") {
+                                                popUpTo("login") { inclusive = true }
+                                                launchSingleTop = true
+                                            }
+                                        }
                                     }
-
-                                    navController.popBackStack()
-                                }
-                            )
-                        } else {
-                            Text("No se encontró la lección.")
-                        }
-                    }
-
-                    // 9. Resultado final del curso
-                    composable(
-                        route = "resultadoFinal/{cursoId}",
-                        arguments = listOf(
-                            navArgument("cursoId") {
-                                type = NavType.IntType
+                                )
                             }
-                        )
-                    ) { entry ->
 
-                        val cursoId =
-                            entry.arguments?.getInt("cursoId") ?: -1
+                            composable("home") {
+                                HomeScreen(
+                                    navController = navController,
+                                    viewModel = authViewModel,
+                                    onCerrarSesion = {
+                                        authViewModel.cerrarSesion()
+                                        catalogoViewModel.cerrarSesion()
+                                        navController.navigate("register") {
+                                            popUpTo("home") { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
 
-                        val curso =
-                            catalogoViewModel.obtenerCursoPorId(cursoId)
+                            composable("catalogo") {
+                                CatalogoScreen(
+                                    viewModel = catalogoViewModel,
+                                    onCursoClick = { cursoId ->
+                                        navController.navigate("detalleCurso/$cursoId")
+                                    }
+                                )
+                            }
 
-                        if (curso != null) {
-                            ResultadoFinalScreen(
-                                curso = curso,
-                                viewModel = catalogoViewModel,
-                                onVolver = {
-                                    navController.popBackStack()
+                            composable("misCursos") {
+                                MisCursosScreen(
+                                    viewModel = catalogoViewModel,
+                                    onCursoClick = { cursoId ->
+                                        navController.navigate("detalleCurso/$cursoId")
+                                    },
+                                    onExplorarCursos = {
+                                        navController.navigate("catalogo") {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
+
+                            composable("perfil") {
+                                PerfilScreen(
+                                    viewModel = authViewModel,
+                                    onCerrarSesion = {
+                                        authViewModel.cerrarSesion()
+                                        catalogoViewModel.cerrarSesion()
+                                        navController.navigate("register") {
+                                            popUpTo("home") { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
+
+                            composable(
+                                route = "detalleCurso/{cursoId}",
+                                arguments = listOf(navArgument("cursoId") { type = NavType.IntType })
+                            ) { entry ->
+                                val cursoId = entry.arguments?.getInt("cursoId") ?: -1
+                                val curso = catalogoViewModel.obtenerCursoPorId(cursoId)
+
+                                if (curso != null) {
+                                    DetalleCursoScreen(
+                                        curso = curso,
+                                        leccionViewModel = leccionViewModel,
+                                        onLeccionClick = { leccionId ->
+                                            catalogoViewModel.inscribirCurso(cursoId)
+                                            navController.navigate("detalleLeccion/$leccionId")
+                                        },
+                                        onVolver = { navController.popBackStack() },
+                                        onComenzar = {
+                                            catalogoViewModel.inscribirCurso(cursoId)
+                                            navController.navigate("clasesCurso/$cursoId")
+                                        }
+                                    )
+                                } else {
+                                    Text("No se encontró el curso.")
                                 }
-                            )
-                        } else {
-                            Text("No se encontró el curso.")
+                            }
+
+                            composable(
+                                route = "clasesCurso/{cursoId}",
+                                arguments = listOf(navArgument("cursoId") { type = NavType.IntType })
+                            ) { entry ->
+                                val cursoId = entry.arguments?.getInt("cursoId") ?: -1
+                                val curso = catalogoViewModel.obtenerCursoPorId(cursoId)
+
+                                if (curso != null) {
+                                    ClasesCursoScreen(
+                                        curso = curso,
+                                        viewModel = catalogoViewModel,
+                                        leccionViewModel = leccionViewModel,
+                                        onLeccionClick = { leccionId ->
+                                            navController.navigate("detalleLeccion/$leccionId")
+                                        },
+                                        onResultadoClick = {
+                                            navController.navigate("resultadoFinal/${curso.id}")
+                                        },
+                                        onVolver = { navController.popBackStack() }
+                                    )
+                                } else {
+                                    Text("No se encontró el curso.")
+                                }
+                            }
+
+                            composable(
+                                route = "detalleLeccion/{leccionId}",
+                                arguments = listOf(navArgument("leccionId") { type = NavType.IntType })
+                            ) { entry ->
+                                val leccionId = entry.arguments?.getInt("leccionId") ?: -1
+                                val leccion = leccionViewModel.obtenerLeccionPorId(leccionId)
+
+                                if (leccion != null) {
+                                    DetalleLeccionScreen(
+                                        leccion = leccion,
+                                        onVolver = { navController.popBackStack() },
+                                        onCompletar = {
+                                            if (!catalogoViewModel.estaClaseCompletada(
+                                                    cursoId = leccion.cursoId,
+                                                    numeroClase = leccion.numero
+                                                )
+                                            ) {
+                                                catalogoViewModel.alternarClaseCompletada(
+                                                    cursoId = leccion.cursoId,
+                                                    numeroClase = leccion.numero
+                                                )
+                                            }
+                                            navController.popBackStack()
+                                        }
+                                    )
+                                } else {
+                                    Text("No se encontró la lección.")
+                                }
+                            }
+
+                            composable(
+                                route = "resultadoFinal/{cursoId}",
+                                arguments = listOf(navArgument("cursoId") { type = NavType.IntType })
+                            ) { entry ->
+                                val cursoId = entry.arguments?.getInt("cursoId") ?: -1
+                                val curso = catalogoViewModel.obtenerCursoPorId(cursoId)
+
+                                if (curso != null) {
+                                    ResultadoFinalScreen(
+                                        curso = curso,
+                                        viewModel = catalogoViewModel,
+                                        onVolver = { navController.popBackStack() }
+                                    )
+                                } else {
+                                    Text("No se encontró el curso.")
+                                }
+                            }
                         }
                     }
                 }

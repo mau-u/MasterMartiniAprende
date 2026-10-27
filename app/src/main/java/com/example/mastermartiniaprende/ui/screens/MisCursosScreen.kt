@@ -1,5 +1,6 @@
 package com.example.mastermartiniaprende.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.viewmodel.CatalogoViewModel
@@ -67,6 +69,10 @@ fun MisCursosScreen(
                 ) { curso ->
 
                     val progreso = viewModel.progresoCurso(curso)
+                    val progresoAnimado by animateFloatAsState(
+                        targetValue = progreso.coerceIn(0, 100) / 100f,
+                        label = "avanceCurso${curso.id}"
+                    )
 
                     Card(
                         modifier = Modifier.fillMaxWidth()
@@ -102,7 +108,7 @@ fun MisCursosScreen(
                             )
 
                             LinearProgressIndicator(
-                                progress = { progreso / 100f },
+                                progress = { progresoAnimado },
                                 modifier = Modifier.fillMaxWidth()
                             )
 
