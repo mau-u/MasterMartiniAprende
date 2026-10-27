@@ -36,12 +36,13 @@ fun DetalleCursoScreen(
     catalogoViewModel: CatalogoViewModel,
     onLeccionClick: (Int) -> Unit,
     onVolver: () -> Unit,
-    onComenzar: () -> Unit
+    onResultadoClick: () -> Unit
 ) {
     LaunchedEffect(curso.id) {
         leccionViewModel.cargarLecciones(curso.id)
     }
     val lecciones = leccionViewModel.lecciones.value
+    val progreso = catalogoViewModel.progresoCurso(curso)
     val leccionConVideo = lecciones.firstOrNull { it.videoResourceId != null }
 
     val imagenCurso = when (curso.id) {
@@ -121,6 +122,20 @@ fun DetalleCursoScreen(
         )
 
         lecciones.forEach { leccion ->
+            val completada = catalogoViewModel.estaClaseCompletada(curso.id, leccion.numero)
+            val imagenLeccion = when (curso.id) {
+                1 -> when (leccion.numero) {
+                    1 -> R.drawable.ingredientes_chocolate
+                    2 -> R.drawable.base_chocolate
+                    3 -> R.drawable.ganache_chocolate
+                    4 -> R.drawable.cobertura_chocolate
+                    5 -> R.drawable.resultado_chocolate
+                    else -> null
+                }
+                2 -> R.drawable.pasteleria_vitrina
+                3 -> R.drawable.masas_bolleria
+                else -> null
+            }
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,8 +144,19 @@ fun DetalleCursoScreen(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (imagenLeccion != null) {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(imagenLeccion),
+                            contentDescription = "Imagen de ${leccion.titulo}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                     Text(
                         text = "RECETA ${leccion.numero}",
                         style = MaterialTheme.typography.labelLarge,
@@ -141,16 +167,24 @@ fun DetalleCursoScreen(
                         text = "${leccion.duracionMinutos} min · Ver ingredientes y preparación",
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    Text(
+                        text = if (completada) "✓ Completada" else "Pendiente",
+                        color = if (completada) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }
 
-        Button(
-            onClick = onComenzar,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text("Ver todas las clases y recetas")
+        if (progreso == 100) {
+            Button(
+                onClick = onResultadoClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Registrar mi resultado final")
+            }
         }
 
         OutlinedButton(

@@ -23,7 +23,7 @@ import com.example.mastermartiniaprende.data.local.AppDatabase
 import com.example.mastermartiniaprende.repository.AppRepository
 import com.example.mastermartiniaprende.ui.components.BarraNavegacionPrincipal
 import com.example.mastermartiniaprende.ui.screens.CatalogoScreen
-import com.example.mastermartiniaprende.ui.screens.ClasesCursoScreen
+
 import com.example.mastermartiniaprende.ui.screens.DetalleCursoScreen
 import com.example.mastermartiniaprende.ui.screens.DetalleLeccionScreen
 import com.example.mastermartiniaprende.ui.screens.HomeScreen
@@ -173,9 +173,8 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("detalleLeccion/$leccionId")
                                         },
                                         onVolver = { navController.popBackStack() },
-                                        onComenzar = {
-                                            catalogoViewModel.inscribirCurso(cursoId)
-                                            navController.navigate("clasesCurso/$cursoId")
+                                        onResultadoClick = {
+                                            navController.navigate("resultadoFinal/$cursoId")
                                         }
                                     )
                                 } else {
@@ -183,30 +182,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(
-                                route = "clasesCurso/{cursoId}",
-                                arguments = listOf(navArgument("cursoId") { type = NavType.IntType })
-                            ) { entry ->
-                                val cursoId = entry.arguments?.getInt("cursoId") ?: -1
-                                val curso = catalogoViewModel.obtenerCursoPorId(cursoId)
-
-                                if (curso != null) {
-                                    ClasesCursoScreen(
-                                        curso = curso,
-                                        viewModel = catalogoViewModel,
-                                        leccionViewModel = leccionViewModel,
-                                        onLeccionClick = { leccionId ->
-                                            navController.navigate("detalleLeccion/$leccionId")
-                                        },
-                                        onResultadoClick = {
-                                            navController.navigate("resultadoFinal/${curso.id}")
-                                        },
-                                        onVolver = { navController.popBackStack() }
-                                    )
-                                } else {
-                                    Text("No se encontró el curso.")
-                                }
-                            }
 
                             composable(
                                 route = "detalleLeccion/{leccionId}",
