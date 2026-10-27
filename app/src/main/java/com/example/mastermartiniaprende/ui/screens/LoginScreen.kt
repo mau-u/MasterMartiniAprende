@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,11 +36,13 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
+
         Text(
-            text = "Master Martini Aprende",
+            text = "Master Martini Aula",
             style = MaterialTheme.typography.headlineSmall
         )
 
@@ -51,27 +55,54 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Campo: Correo electrónico
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
+            onValueChange = {
+                email = it
+                viewModel.errorEmailLogin.value = null
+                viewModel.mensaje.value = ""
+            },
+            label = {
+                Text("Correo electrónico")
+            },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.errorEmailLogin.value != null,
+            supportingText = {
+                viewModel.errorEmailLogin.value?.let { error ->
+                    Text(error)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Campo: Contraseña
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
+            onValueChange = {
+                password = it
+                viewModel.errorPasswordLogin.value = null
+                viewModel.mensaje.value = ""
+            },
+            label = {
+                Text("Contraseña")
+            },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.errorPasswordLogin.value != null,
+            supportingText = {
+                viewModel.errorPasswordLogin.value?.let { error ->
+                    Text(error)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Botón: iniciar sesión
         Button(
             onClick = {
                 if (viewModel.login(email, password)) {
@@ -83,11 +114,13 @@ fun LoginScreen(
             Text("Entrar")
         }
 
+        // Mensaje general del inicio de sesión
         Text(
             text = viewModel.mensaje.value,
             modifier = Modifier.padding(top = 12.dp)
         )
 
+        // Volver al registro
         TextButton(
             onClick = {
                 navController.popBackStack()

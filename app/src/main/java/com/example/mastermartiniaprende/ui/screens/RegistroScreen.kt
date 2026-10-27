@@ -2,11 +2,11 @@ package com.example.mastermartiniaprende.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,92 +30,131 @@ fun RegistroScreen(
 ) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var tipoNegocio by remember { mutableStateOf("")}
+    var tipoNegocio by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Master Martini Aprende",
+            text = "Master Martini Aula",
             style = MaterialTheme.typography.headlineSmall
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Crea tu cuenta",
             style = MaterialTheme.typography.titleMedium
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
+        // Campo: Nombre
         OutlinedTextField(
             value = nombre,
-            onValueChange = { nombre = it },
+            onValueChange = {
+                nombre = it
+                viewModel.errorNombreRegistro.value = null
+            },
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.errorNombreRegistro.value != null,
+            supportingText = {
+                viewModel.errorNombreRegistro.value?.let { error ->
+                    Text(error)
+                }
+            }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
+        // Campo: Correo
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                viewModel.errorEmailRegistro.value = null
+            },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.errorEmailRegistro.value != null,
+            supportingText = {
+                viewModel.errorEmailRegistro.value?.let { error ->
+                    Text(error)
+                }
+            }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
+        // Campo: Tipo de negocio
         OutlinedTextField(
             value = tipoNegocio,
-            onValueChange = { tipoNegocio = it },
-            label = { Text("Tipo de negocio o emprendimiento") },
-            supportingText = {
-                Text("Ej.: pastelería, panadería o cafetería")
+            onValueChange = {
+                tipoNegocio = it
+                viewModel.errorTipoNegocioRegistro.value = null
             },
+            label = { Text("Tipo de negocio o emprendimiento") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = viewModel.errorTipoNegocioRegistro.value != null,
+            supportingText = {
+                val error = viewModel.errorTipoNegocioRegistro.value
+
+                Text(
+                    error ?: "Ej.: pastelería, panadería o cafetería"
+                )
+            }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
+        // Campo: Contraseña
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                viewModel.errorPasswordRegistro.value = null
+            },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            isError = viewModel.errorPasswordRegistro.value != null,
+            supportingText = {
+                viewModel.errorPasswordRegistro.value?.let { error ->
+                    Text(error)
+                }
+            }
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
+        // Botón para registrar
         Button(
             onClick = {
-                viewModel.registrar(
+                val registroExitoso = viewModel.registrar(
                     nombre = nombre,
                     email = email,
                     password = password,
                     tipoNegocio = tipoNegocio
                 )
+
+                if (registroExitoso) {
+                    navController.navigate("login") {
+                        popUpTo("register") {
+                            inclusive = true
+                        }
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Crear cuenta")
         }
 
+        // Mensaje de resultado
         Text(
             text = viewModel.mensaje.value,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth()
         )
 
+        // Navegar al login
         TextButton(
             onClick = {
                 navController.navigate("login")

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,7 +29,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "¡Bienvenido a Master Martini Aprende!",
+            text = "¡Bienvenido a Master Martini Aula!",
             style = MaterialTheme.typography.headlineSmall
         )
 
@@ -47,6 +48,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Botón para explorar el catálogo
         Button(
             onClick = {
                 navController.navigate("catalogo")
@@ -54,6 +56,18 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Explorar cursos")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Botón para ver los cursos inscritos
+        OutlinedButton(
+            onClick = {
+                navController.navigate("misCursos")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Mis cursos")
         }
     }
 }
