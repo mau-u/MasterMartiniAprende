@@ -5,6 +5,10 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,17 +49,38 @@ fun ResultadoFinalScreen(
 ) {
     val context = LocalContext.current
 
-    var mensaje by remember { mutableStateOf("") }
-    var rutaTemporal by remember { mutableStateOf<String?>(null) }
-    var fotoPendiente by remember { mutableStateOf<String?>(null) }
+    var mensaje by remember {
+        mutableStateOf("")
+    }
+
+    var rutaTemporal by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var fotoPendiente by remember {
+        mutableStateOf<String?>(null)
+    }
 
     val progreso = viewModel.progresoCurso(curso)
     val rutaGuardada = viewModel.obtenerFotoResultado(curso.id)
+
     val imagenGuardada = remember(rutaGuardada) {
-        rutaGuardada?.let { BitmapFactory.decodeFile(it)?.asImageBitmap() }
+        rutaGuardada?.let {
+            BitmapFactory.decodeFile(it)?.asImageBitmap()
+        }
     }
+
     val imagenPendiente = remember(fotoPendiente) {
-        fotoPendiente?.let { BitmapFactory.decodeFile(it)?.asImageBitmap() }
+        fotoPendiente?.let {
+            BitmapFactory.decodeFile(it)?.asImageBitmap()
+        }
+    }
+
+    val nombreTrofeo = when (curso.id) {
+        1 -> "Maestro del chocolate"
+        2 -> "Maestro pastelero"
+        3 -> "Maestro de masas"
+        else -> "Curso completado"
     }
 
     val selectorGaleria = rememberLauncherForActivityResult(
@@ -66,11 +92,16 @@ fun ResultadoFinalScreen(
                     context.filesDir,
                     "resultado_${curso.id}_${System.currentTimeMillis()}.jpg"
                 )
+
                 val entrada = context.contentResolver.openInputStream(uri)
                     ?: error("No se pudo abrir la imagen.")
+
                 entrada.use { input ->
-                    FileOutputStream(archivo).use { output -> input.copyTo(output) }
+                    FileOutputStream(archivo).use { output ->
+                        input.copyTo(output)
+                    }
                 }
+
                 fotoPendiente = archivo.absolutePath
                 mensaje = "Revisa tu fotografía y guárdala en este curso."
             } catch (error: Exception) {
@@ -84,6 +115,7 @@ fun ResultadoFinalScreen(
     ) { guardada ->
         if (guardada) {
             val ruta = rutaTemporal
+
             if (ruta != null && File(ruta).length() > 0L) {
                 fotoPendiente = ruta
                 mensaje = "Revisa tu fotografía y guárdala en este curso."
@@ -102,12 +134,15 @@ fun ResultadoFinalScreen(
                 context.filesDir,
                 "resultado_${curso.id}_${System.currentTimeMillis()}.jpg"
             )
+
             archivo.createNewFile()
+
             val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
                 archivo
             )
+
             rutaTemporal = archivo.absolutePath
             selectorCamara.launch(uri)
         } catch (error: Exception) {
@@ -132,9 +167,21 @@ fun ResultadoFinalScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Mi resultado final", style = MaterialTheme.typography.headlineSmall)
-        Text(curso.titulo, style = MaterialTheme.typography.titleLarge)
-        Text("Progreso del curso: $progreso%", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Mi resultado final",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Text(
+            text = curso.titulo,
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Text(
+            text = "Progreso del curso: $progreso%",
+            style = MaterialTheme.typography.titleMedium
+        )
+
         LinearProgressIndicator(
             progress = { progreso / 100f },
             modifier = Modifier.fillMaxWidth()
@@ -142,25 +189,39 @@ fun ResultadoFinalScreen(
 
         if (progreso == 100) {
             Text(
-                "¡Felicitaciones! Completaste el curso. Ahora puedes guardar una foto de tu preparación."
+                text = "¡Felicitaciones! Completaste el curso. " +
+                        "Ahora puedes guardar una foto de tu preparación."
             )
         } else {
-            Text("Completa todas las clases para registrar tu resultado final.")
+            Text(
+                text = "Completa todas las clases para registrar tu resultado final."
+            )
         }
 
         if (imagenPendiente != null) {
-            Text("Vista previa de tu foto", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Vista previa de tu foto",
+                style = MaterialTheme.typography.titleMedium
+            )
+
             Image(
                 bitmap = imagenPendiente,
                 contentDescription = "Vista previa de mi resultado",
-                modifier = Modifier.fillMaxWidth().height(240.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp),
                 contentScale = ContentScale.Crop
             )
+
             Button(
                 onClick = {
                     val ruta = fotoPendiente
+
                     if (ruta != null) {
-                        viewModel.guardarFotoResultado(curso.id, ruta) { guardada ->
+                        viewModel.guardarFotoResultado(
+                            curso.id,
+                            ruta
+                        ) { guardada ->
                             if (guardada) {
                                 fotoPendiente = null
                                 mensaje = "¡Foto guardada en el curso!"
@@ -175,20 +236,67 @@ fun ResultadoFinalScreen(
                 Text("Guardar foto en mi curso")
             }
         } else if (imagenGuardada != null) {
-            Text("Foto guardada en este curso", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Foto guardada en este curso",
+                style = MaterialTheme.typography.titleMedium
+            )
+
             Image(
                 bitmap = imagenGuardada,
                 contentDescription = "Mi resultado final guardado",
-                modifier = Modifier.fillMaxWidth().height(240.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp),
                 contentScale = ContentScale.Crop
             )
         } else {
             Text("Todavía no has guardado una fotografía.")
         }
 
+        // Trofeo animado: curso completo y fotografía guardada
+        AnimatedVisibility(
+            visible = progreso == 100 &&
+                    rutaGuardada != null &&
+                    imagenGuardada != null,
+            enter = fadeIn(tween(350)) +
+                    scaleIn(
+                        initialScale = 0.75f,
+                        animationSpec = tween(350)
+                    )
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "🏆",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+
+                    Text(
+                        text = "¡Trofeo desbloqueado!",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Text(
+                        text = nombreTrofeo,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Text(
+                        text = "Has completado el curso y guardado tu preparación."
+                    )
+                }
+            }
+        }
+
         Button(
             onClick = {
-                if (ContextCompat.checkSelfPermission(
+                if (
+                    ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.CAMERA
                     ) == PackageManager.PERMISSION_GRANTED
@@ -205,7 +313,9 @@ fun ResultadoFinalScreen(
         }
 
         OutlinedButton(
-            onClick = { selectorGaleria.launch("image/*") },
+            onClick = {
+                selectorGaleria.launch("image/*")
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = progreso == 100
         ) {
@@ -213,10 +323,16 @@ fun ResultadoFinalScreen(
         }
 
         if (mensaje.isNotBlank()) {
-            Text(mensaje, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = mensaje,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
-        OutlinedButton(onClick = onVolver, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = onVolver,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Volver")
         }
     }

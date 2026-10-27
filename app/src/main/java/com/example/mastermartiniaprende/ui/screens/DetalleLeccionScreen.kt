@@ -1,5 +1,9 @@
 package com.example.mastermartiniaprende.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +21,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.example.mastermartiniaprende.R
 import com.example.mastermartiniaprende.model.Leccion
 import com.example.mastermartiniaprende.ui.components.ReproductorVideoLocal
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun DetalleLeccionScreen(
@@ -32,7 +43,13 @@ fun DetalleLeccionScreen(
     onVolver: () -> Unit,
     onCompletar: () -> Unit
 ) {
-    val imagen = when (leccion.cursoId) {
+    var completando by remember {
+        mutableStateOf(false)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    val imagen: Int? = when (leccion.cursoId) {
         1 -> when (leccion.numero) {
             1 -> R.drawable.ingredientes_chocolate
             2 -> R.drawable.base_chocolate
@@ -41,6 +58,7 @@ fun DetalleLeccionScreen(
             5 -> R.drawable.resultado_chocolate
             else -> null
         }
+
         2 -> R.drawable.foto_pasteleria_pexels
         3 -> R.drawable.foto_croissants_pexels
         else -> null
@@ -58,6 +76,27 @@ fun DetalleLeccionScreen(
             style = MaterialTheme.typography.headlineSmall
         )
 
+        AnimatedVisibility(
+            visible = completando,
+            enter = fadeIn(tween(250)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 3 },
+                        animationSpec = tween(250)
+                    )
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "✓ ¡Clase completada! Muy buen trabajo.",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
         if (imagen != null) {
             Image(
                 painter = painterResource(imagen),
@@ -70,15 +109,27 @@ fun DetalleLeccionScreen(
             )
         }
 
-        Text(leccion.titulo, style = MaterialTheme.typography.titleLarge)
-        Text("${leccion.duracionMinutos} minutos", style = MaterialTheme.typography.labelLarge)
-        Text(leccion.descripcion, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = leccion.titulo,
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Text(
+            text = "${leccion.duracionMinutos} minutos",
+            style = MaterialTheme.typography.labelLarge
+        )
+
+        Text(
+            text = leccion.descripcion,
+            style = MaterialTheme.typography.bodyLarge
+        )
 
         leccion.videoResourceId?.let { videoId ->
             Text(
                 text = "Video de apoyo",
                 style = MaterialTheme.typography.titleMedium
             )
+
             ReproductorVideoLocal(
                 videoResourceId = videoId,
                 imagenPortada = imagen ?: R.drawable.foto_chocolate_pexels,
@@ -86,7 +137,9 @@ fun DetalleLeccionScreen(
             )
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -95,18 +148,28 @@ fun DetalleLeccionScreen(
                     text = "Materiales e ingredientes",
                     style = MaterialTheme.typography.titleMedium
                 )
+
                 leccion.materiales.forEach { material ->
-                    Text(text = "• $material", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = "• $material",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Receta paso a paso", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "Receta paso a paso",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 leccion.pasos.forEachIndexed { indice, paso ->
                     Text(
                         text = "${indice + 1}. $paso",
@@ -119,15 +182,32 @@ fun DetalleLeccionScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = onCompletar,
-            modifier = Modifier.fillMaxWidth()
+            onClick = {
+                if (!completando) {
+                    completando = true
+
+                    scope.launch {
+                        delay(650)
+                        onCompletar()
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !completando
         ) {
-            Text("Marcar clase como completada")
+            Text(
+                if (completando) {
+                    "¡Clase completada!"
+                } else {
+                    "Marcar clase como completada"
+                }
+            )
         }
 
         OutlinedButton(
             onClick = onVolver,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !completando
         ) {
             Text("Volver a las clases")
         }

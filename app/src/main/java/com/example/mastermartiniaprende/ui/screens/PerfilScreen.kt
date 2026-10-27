@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +26,8 @@ import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 @Composable
 fun PerfilScreen(
     viewModel: AuthViewModel,
-    onCerrarSesion: () -> Unit
+    onCerrarSesion: () -> Unit,
+    onVerLogros: () -> Unit = {}
 ) {
     val usuario = viewModel.perfilActual.value
 
@@ -37,6 +39,7 @@ fun PerfilScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         MarcaMasterMartini()
+
         Text(
             text = "Mi perfil",
             style = MaterialTheme.typography.headlineSmall,
@@ -54,23 +57,32 @@ fun PerfilScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                val inicial = usuario?.nombre?.firstOrNull()?.uppercaseChar()?.toString() ?: "M"
+                val inicial = usuario?.nombre
+                    ?.firstOrNull()
+                    ?.uppercaseChar()
+                    ?.toString() ?: "M"
+
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         text = inicial,
-                        modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
+                        modifier = Modifier.padding(
+                            horizontal = 22.dp,
+                            vertical = 12.dp
+                        ),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+
                 Text(
                     text = usuario?.nombre ?: "Usuario",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
                     text = usuario?.email ?: "No hay una sesión activa",
                     style = MaterialTheme.typography.bodyLarge
@@ -86,9 +98,14 @@ fun PerfilScreen(
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("Mi negocio", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = usuario?.tipoNegocio?.takeIf { it.isNotBlank() }
+                    text = "Mi negocio",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = usuario?.tipoNegocio
+                        ?.takeIf { it.isNotBlank() }
                         ?: "Tipo de negocio no informado",
                     style = MaterialTheme.typography.bodyLarge
                 )
@@ -100,6 +117,14 @@ fun PerfilScreen(
             style = MaterialTheme.typography.bodyLarge
         )
 
+        OutlinedButton(
+            onClick = onVerLogros,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text("Mis logros 🏆")
+        }
+
         Button(
             onClick = onCerrarSesion,
             modifier = Modifier.fillMaxWidth(),
@@ -109,4 +134,3 @@ fun PerfilScreen(
         }
     }
 }
-

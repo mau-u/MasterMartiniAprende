@@ -1,5 +1,9 @@
 package com.example.mastermartiniaprende.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mastermartiniaprende.ui.components.IconoErrorCampo
 import com.example.mastermartiniaprende.ui.components.MarcaMasterMartini
+import com.example.mastermartiniaprende.ui.components.MensajeErrorAnimado
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 
 @Composable
@@ -44,11 +49,14 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         MarcaMasterMartini(grande = true)
+
         Spacer(modifier = Modifier.height(20.dp))
+
         Text(
             text = "Iniciar sesión",
             style = MaterialTheme.typography.titleLarge
         )
+
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
@@ -63,10 +71,14 @@ fun LoginScreen(
             singleLine = true,
             isError = viewModel.errorEmailLogin.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorEmailLogin.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorEmailLogin.value != null
+                )
             },
             supportingText = {
-                viewModel.errorEmailLogin.value?.let { Text(it) }
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorEmailLogin.value
+                )
             }
         )
 
@@ -85,10 +97,14 @@ fun LoginScreen(
             singleLine = true,
             isError = viewModel.errorPasswordLogin.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorPasswordLogin.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorPasswordLogin.value != null
+                )
             },
             supportingText = {
-                viewModel.errorPasswordLogin.value?.let { Text(it) }
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorPasswordLogin.value
+                )
             }
         )
 
@@ -105,18 +121,37 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = !viewModel.cargando.value
         ) {
-            Text(if (viewModel.cargando.value) "Ingresando…" else "Entrar")
+            Text(
+                if (viewModel.cargando.value) {
+                    "Ingresando…"
+                } else {
+                    "Entrar"
+                }
+            )
         }
 
-        Text(
-            text = viewModel.mensaje.value,
-            modifier = Modifier.padding(top = 12.dp)
-        )
+        AnimatedVisibility(
+            visible = viewModel.mensaje.value.isNotBlank(),
+            enter = fadeIn(tween(220)) +
+                    slideInVertically(
+                        initialOffsetY = { -it / 3 },
+                        animationSpec = tween(220)
+                    )
+        ) {
+            Text(
+                text = viewModel.mensaje.value,
+                modifier = Modifier.padding(top = 12.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         TextButton(
             onClick = {
                 navController.navigate("register") {
-                    popUpTo("login") { inclusive = true }
+                    popUpTo("login") {
+                        inclusive = true
+                    }
                     launchSingleTop = true
                 }
             },

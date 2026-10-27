@@ -17,6 +17,8 @@ data class DatosUsuarioCursos(
 )
 
 class AppRepository(private val appDao: AppDao) {
+
+    // Registrar una cuenta nueva
     suspend fun registrarUsuario(
         nombre: String,
         email: String,
@@ -25,6 +27,7 @@ class AppRepository(private val appDao: AppDao) {
     ): Boolean {
         val emailNormalizado = email.trim().lowercase()
         val salt = PasswordHasher.crearSalt()
+
         val hash = withContext(Dispatchers.Default) {
             PasswordHasher.generarHash(password, salt)
         }
@@ -38,76 +41,141 @@ class AppRepository(private val appDao: AppDao) {
                 passwordSalt = salt
             )
         )
+
         return resultado != -1L
     }
 
-    suspend fun iniciarSesion(email: String, password: String): Usuario? {
+    // Iniciar sesión comprobando la contraseña
+    suspend fun iniciarSesion(
+        email: String,
+        password: String
+    ): Usuario? {
         val emailNormalizado = email.trim().lowercase()
-        val usuario = appDao.obtenerUsuario(emailNormalizado) ?: return null
+
+        val usuarioEntity =
+            appDao.obtenerUsuario(emailNormalizado)
+                ?: return null
+
         val passwordValida = withContext(Dispatchers.Default) {
             PasswordHasher.verificar(
                 password = password,
-                salt = usuario.passwordSalt,
-                hashGuardado = usuario.passwordHash
+                salt = usuarioEntity.passwordSalt,
+                hashGuardado = usuarioEntity.passwordHash
             )
         }
 
         return if (passwordValida) {
             Usuario(
-                nombre = usuario.nombre,
-                email = usuario.email,
-                tipoNegocio = usuario.tipoNegocio
+                nombre = usuarioEntity.nombre,
+                email = usuarioEntity.email,
+                tipoNegocio = usuarioEntity.tipoNegocio
             )
         } else {
             null
         }
     }
 
-    suspend fun cargarDatosCursos(email: String): DatosUsuarioCursos {
-        val inscripciones = appDao.obtenerInscripciones(email)
-        val clases = appDao.obtenerClasesCompletadas(email)
-        val fotos = appDao.obtenerFotosResultado(email)
+    // Recuperar una cuenta existente para restaurar la sesión.
+    // No vuelve a solicitar la contraseña, porque la sesión
+    // ya fue autenticada anteriormente.
+    suspend fun obtenerUsuarioPorEmail(
+        email: String
+    ): Usuario? {
+        val emailNormalizado = email.trim().lowercase()
+
+        val usuarioEntity =
+            appDao.obtenerUsuario(emailNormalizado)
+                ?: return null
+
+        return Usuario(
+            nombre = usuarioEntity.nombre,
+            email = usuarioEntity.email,
+            tipoNegocio = usuarioEntity.tipoNegocio
+        )
+    }
+
+    // Recuperar cursos, clases completadas y fotografías del usuario
+    suspend fun cargarDatosCursos(
+        email: String
+    ): DatosUsuarioCursos {
+        val emailNormalizado = email.trim().lowercase()
+
+        val inscripciones =
+            appDao.obtenerInscripciones(emailNormalizado)
+
+        val clases =
+            appDao.obtenerClasesCompletadas(emailNormalizado)
+
+        val fotos =
+            appDao.obtenerFotosResultado(emailNormalizado)
 
         return DatosUsuarioCursos(
-            cursosInscritos = inscripciones.map { it.cursoId }.toSet(),
+            cursosInscritos = inscripciones
+                .map { it.cursoId }
+                .toSet(),
+
             clasesCompletadas = clases
                 .groupBy { it.cursoId }
                 .mapValues { (_, registros) ->
-                    registros.map { it.numeroClase }.toSet()
+                    registros
+                        .map { it.numeroClase }
+                        .toSet()
                 },
-            fotosResultado = fotos.associate { it.cursoId to it.rutaLocal }
+
+            fotosResultado = fotos.associate {
+                it.cursoId to it.rutaLocal
+            }
         )
     }
 
-    suspend fun inscribirCurso(email: String, cursoId: Int) {
+    // Inscribir al usuario en un curso
+    suspend fun inscribirCurso(
+        email: String,
+        cursoId: Int
+    ) {
         appDao.insertarInscripcion(
-            InscripcionEntity(emailUsuario = email, cursoId = cursoId)
+            InscripcionEntity(
+                emailUsuario = email.trim().lowercase(),
+                cursoId = cursoId
+            )
         )
     }
 
+    // Guardar o eliminar el progreso de una clase
     suspend fun guardarProgresoClase(
         email: String,
         cursoId: Int,
         numeroClase: Int,
         completada: Boolean
     ) {
+        val emailNormalizado = email.trim().lowercase()
+
         if (completada) {
             appDao.guardarClaseCompletada(
                 ClaseCompletadaEntity(
-                    emailUsuario = email,
+                    emailUsuario = emailNormalizado,
                     cursoId = cursoId,
                     numeroClase = numeroClase
                 )
             )
         } else {
-            appDao.eliminarClaseCompletada(email, cursoId, numeroClase)
+            appDao.eliminarClaseCompletada(
+                emailNormalizado,
+                cursoId,
+                numeroClase
+            )
         }
     }
 
-    suspend fun guardarFotoResultado(email: String, cursoId: Int, rutaLocal: String) {
+    // Guardar la ruta de la fotografía final
+    suspend fun guardarFotoResultado(
+        email: String,
+        cursoId: Int,
+        rutaLocal: String
+    ) {
         appDao.guardarFotoResultado(
             FotoResultadoEntity(
-                emailUsuario = email,
+                emailUsuario = email.trim().lowercase(),
                 cursoId = cursoId,
                 rutaLocal = rutaLocal
             )

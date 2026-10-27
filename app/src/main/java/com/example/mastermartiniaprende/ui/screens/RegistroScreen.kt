@@ -1,5 +1,9 @@
 package com.example.mastermartiniaprende.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mastermartiniaprende.ui.components.IconoErrorCampo
 import com.example.mastermartiniaprende.ui.components.MarcaMasterMartini
+import com.example.mastermartiniaprende.ui.components.MensajeErrorAnimado
 import com.example.mastermartiniaprende.viewmodel.AuthViewModel
 
 @Composable
@@ -43,6 +48,7 @@ fun RegistroScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         MarcaMasterMartini(grande = true)
+
         Text(
             text = "Crea tu cuenta",
             style = MaterialTheme.typography.titleLarge
@@ -53,16 +59,21 @@ fun RegistroScreen(
             onValueChange = {
                 nombre = it
                 viewModel.errorNombreRegistro.value = null
+                viewModel.mensaje.value = ""
             },
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorNombreRegistro.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorNombreRegistro.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorNombreRegistro.value != null
+                )
             },
             supportingText = {
-                viewModel.errorNombreRegistro.value?.let { Text(it) }
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorNombreRegistro.value
+                )
             }
         )
 
@@ -71,16 +82,21 @@ fun RegistroScreen(
             onValueChange = {
                 email = it
                 viewModel.errorEmailRegistro.value = null
+                viewModel.mensaje.value = ""
             },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorEmailRegistro.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorEmailRegistro.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorEmailRegistro.value != null
+                )
             },
             supportingText = {
-                viewModel.errorEmailRegistro.value?.let { Text(it) }
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorEmailRegistro.value
+                )
             }
         )
 
@@ -89,17 +105,22 @@ fun RegistroScreen(
             onValueChange = {
                 tipoNegocio = it
                 viewModel.errorTipoNegocioRegistro.value = null
+                viewModel.mensaje.value = ""
             },
             label = { Text("Tipo de negocio o emprendimiento") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = viewModel.errorTipoNegocioRegistro.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorTipoNegocioRegistro.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorTipoNegocioRegistro.value != null
+                )
             },
             supportingText = {
-                val error = viewModel.errorTipoNegocioRegistro.value
-                Text(error ?: "Ej.: pastelería, panadería o cafetería")
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorTipoNegocioRegistro.value,
+                    mensajeAyuda = "Ej.: pastelería, panadería o cafetería"
+                )
             }
         )
 
@@ -108,6 +129,7 @@ fun RegistroScreen(
             onValueChange = {
                 password = it
                 viewModel.errorPasswordRegistro.value = null
+                viewModel.mensaje.value = ""
             },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
@@ -115,10 +137,14 @@ fun RegistroScreen(
             visualTransformation = PasswordVisualTransformation(),
             isError = viewModel.errorPasswordRegistro.value != null,
             trailingIcon = {
-                IconoErrorCampo(visible = viewModel.errorPasswordRegistro.value != null)
+                IconoErrorCampo(
+                    visible = viewModel.errorPasswordRegistro.value != null
+                )
             },
             supportingText = {
-                viewModel.errorPasswordRegistro.value?.let { Text(it) }
+                MensajeErrorAnimado(
+                    mensaje = viewModel.errorPasswordRegistro.value
+                )
             }
         )
 
@@ -132,7 +158,10 @@ fun RegistroScreen(
                 ) { registroExitoso ->
                     if (registroExitoso) {
                         navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
+                            popUpTo("register") {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
                     }
                 }
@@ -140,13 +169,35 @@ fun RegistroScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = !viewModel.cargando.value
         ) {
-            Text(if (viewModel.cargando.value) "Guardando cuenta…" else "Crear cuenta")
+            Text(
+                if (viewModel.cargando.value) {
+                    "Guardando cuenta…"
+                } else {
+                    "Crear cuenta"
+                }
+            )
         }
 
-        Text(
-            text = viewModel.mensaje.value,
-            modifier = Modifier.fillMaxWidth()
-        )
+        AnimatedVisibility(
+            visible = viewModel.mensaje.value.isNotBlank(),
+            enter = fadeIn(tween(220)) +
+                    slideInVertically(
+                        initialOffsetY = { -it / 3 },
+                        animationSpec = tween(220)
+                    )
+        ) {
+            Text(
+                text = viewModel.mensaje.value,
+                modifier = Modifier.fillMaxWidth(),
+                color = if (
+                    viewModel.mensaje.value == "Registro exitoso"
+                ) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.error
+                }
+            )
+        }
 
         TextButton(
             onClick = {
