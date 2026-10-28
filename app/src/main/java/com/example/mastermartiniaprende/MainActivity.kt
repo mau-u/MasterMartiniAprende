@@ -23,7 +23,6 @@ import com.example.mastermartiniaprende.data.local.AppDatabase
 import com.example.mastermartiniaprende.repository.AppRepository
 import com.example.mastermartiniaprende.ui.components.BarraNavegacionPrincipal
 import com.example.mastermartiniaprende.ui.screens.CatalogoScreen
-
 import com.example.mastermartiniaprende.ui.screens.DetalleCursoScreen
 import com.example.mastermartiniaprende.ui.screens.DetalleLeccionScreen
 import com.example.mastermartiniaprende.ui.screens.HomeScreen
