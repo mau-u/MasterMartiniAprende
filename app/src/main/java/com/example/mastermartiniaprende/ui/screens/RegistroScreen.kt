@@ -146,7 +146,9 @@ fun RegistroScreen(
                     mensaje = viewModel.errorPasswordRegistro.value
                 )
             }
+
         )
+
 
         Button(
             onClick = {

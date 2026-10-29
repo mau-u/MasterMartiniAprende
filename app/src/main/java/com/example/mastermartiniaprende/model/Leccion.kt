@@ -9,5 +9,6 @@ data class Leccion(
     val duracionMinutos: Int,
     val materiales: List<String>,
     val pasos: List<String>,
-    val videoResourceId: Int? = null
+    val videoResourceId: Int? = null,
+    val imagenResourceId: Int? = null
 )

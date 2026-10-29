@@ -123,19 +123,7 @@ fun DetalleCursoScreen(
 
         lecciones.forEach { leccion ->
             val completada = catalogoViewModel.estaClaseCompletada(curso.id, leccion.numero)
-            val imagenLeccion = when (curso.id) {
-                1 -> when (leccion.numero) {
-                    1 -> R.drawable.ingredientes_chocolate
-                    2 -> R.drawable.base_chocolate
-                    3 -> R.drawable.ganache_chocolate
-                    4 -> R.drawable.cobertura_chocolate
-                    5 -> R.drawable.resultado_chocolate
-                    else -> null
-                }
-                2 -> R.drawable.pasteleria_vitrina
-                3 -> R.drawable.masas_bolleria
-                else -> null
-            }
+            val imagenLeccion = leccion.imagenResourceId
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -115,12 +115,7 @@ fun ReproductorVideoLocal(
                     ) {
                         Text("Intentar de nuevo")
                     }
-                } else {
-                    Text(
-                        text = "Video guardado en la app; no necesita YouTube ni conexión.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                } 
             }
         }
     }

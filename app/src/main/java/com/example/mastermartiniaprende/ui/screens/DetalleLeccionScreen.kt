@@ -49,20 +49,7 @@ fun DetalleLeccionScreen(
 
     val scope = rememberCoroutineScope()
 
-    val imagen: Int? = when (leccion.cursoId) {
-        1 -> when (leccion.numero) {
-            1 -> R.drawable.ingredientes_chocolate
-            2 -> R.drawable.base_chocolate
-            3 -> R.drawable.ganache_chocolate
-            4 -> R.drawable.cobertura_chocolate
-            5 -> R.drawable.resultado_chocolate
-            else -> null
-        }
-
-        2 -> R.drawable.foto_pasteleria_pexels
-        3 -> R.drawable.foto_croissants_pexels
-        else -> null
-    }
+    val imagen: Int? = leccion.imagenResourceId
 
     Column(
         modifier = Modifier
