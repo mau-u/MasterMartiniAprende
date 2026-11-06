@@ -9,12 +9,24 @@ import androidx.compose.runtime.Composable
 private val DarkColorScheme = darkColorScheme(
     primary = TerracotaClara,
     onPrimary = CacaoOscuro,
-    primaryContainer = Cacao,
+    primaryContainer = Terracota,
     onPrimaryContainer = CremaPastel,
-    secondary = DoradoSuave,
+
+    secondary = DoradoNoche,
     onSecondary = CacaoOscuro,
+    secondaryContainer = CacaoMedio,
+    onSecondaryContainer = Melocoton,
+
     tertiary = VerdePistacho,
     onTertiary = CacaoOscuro,
+    tertiaryContainer = CacaoMedio,
+    onTertiaryContainer = RosaMasa,
+
+    error = RojoNoche,
+    onError = CacaoOscuro,
+    errorContainer = CacaoMedio,
+    onErrorContainer = RojoSuave,
+
     background = CacaoNoche,
     onBackground = CremaPastel,
     surface = CacaoNoche,
@@ -28,15 +40,27 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Blanco,
     primaryContainer = RosaMasa,
     onPrimaryContainer = CacaoOscuro,
+
     secondary = DoradoSuave,
     onSecondary = CacaoOscuro,
+    secondaryContainer = Melocoton,
+    onSecondaryContainer = CacaoOscuro,
+
     tertiary = VerdePistacho,
-    onTertiary = Blanco,
+    onTertiary = CacaoOscuro,
+    tertiaryContainer = RosaMasa,
+    onTertiaryContainer = CacaoOscuro,
+
+    error = RojoMarca,
+    onError = Blanco,
+    errorContainer = RojoSuave,
+    onErrorContainer = RojoMarca,
+
     background = CremaPastel,
     onBackground = CacaoOscuro,
     surface = CremaSuperficie,
     onSurface = CacaoOscuro,
-    surfaceVariant = Melocoton,
+    surfaceVariant = RosaMasa,
     onSurfaceVariant = Cacao
 )
 
